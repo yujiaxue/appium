@@ -13,6 +13,7 @@ import org.openqa.selenium.WebElement;
 
 import com.autotest.Listener.TakeScreen;
 import com.autotest.assertion.Assertion;
+import com.persist.ExecuteDetail;
 import com.persist.api.Operation;
 
 import io.appium.java_client.AppiumDriver;
@@ -29,7 +30,7 @@ import io.appium.java_client.android.StartsActivity;
 public class EntryPoint {
 	AppiumDriver<?> driver = null;
 	String sessionId = null;
-	int caseId = 0;
+	String caseId = "";
 	TouchAction touchAction = null;
 	// int executeId =0;
 
@@ -41,11 +42,11 @@ public class EntryPoint {
 	// this.executeId = executeId;
 	// }
 
-	public int getCaseId() {
+	public String getCaseId() {
 		return caseId;
 	}
 
-	public void setCaseId(int caseId) {
+	public void setCaseId(String caseId) {
 		this.caseId = caseId;
 	}
 
@@ -53,7 +54,7 @@ public class EntryPoint {
 		this.driver = driver;
 		touchAction = new TouchAction(this.driver);
 		this.sessionId = this.driver.getSessionId().toString();
-		Assertion.setAttr(this.driver, this.sessionId);
+		Assertion.setAttr(this.driver, this.sessionId,getDeviceId());
 	}
 
 	public String getSessionId() {
@@ -98,8 +99,7 @@ public class EntryPoint {
 			e.printStackTrace();
 			// 用例失败标记，
 			// 脚本中断退出，未知异常
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-					sessionId, String.format("unknown error { %s ,%s}", locator, e.getMessage()), "", getCaseId());
+			ExecuteDetail.save(sessionId, String.format("unknown error { %s ,%s}", locator, e.getMessage()), "", caseId, getDeviceId());
 			Assertion.failCase();
 		}
 		return ele;
@@ -116,12 +116,15 @@ public class EntryPoint {
 		By type = TypeCheck.getLocatorType(locator);
 		List<WebElement> eles = null;
 		try {
+			
 			eles = (List<WebElement>) driver.findElements(type);
+			ExecuteDetail.save(sessionId, String.format("getElements by { %s } ", locator), "",caseId, getDeviceId());
 		} catch (NoSuchElementException e) {
 			Assertion.noElementFail(locator, e.getMessage(), String.valueOf(getCaseId()));
 		} catch (Exception e) {
 			e.printStackTrace();
-			// Assertion.failCase("fail");
+			ExecuteDetail.save(sessionId, String.format("getElements by { %s } fail { %s }", locator, e.getMessage()),"", caseId, getDeviceId());
+			Assertion.failCase();
 		}
 		return eles;
 	}
@@ -639,7 +642,19 @@ public class EntryPoint {
 	public Object getCapability(String key) {
 		return driver.getCapabilities().getCapability(key);
 	}
-
+	/**
+	 * 获取设备id
+	 * @return
+	 */
+	public String getDeviceId(){
+		//插入记录
+		try{
+			return getCapability("udid").toString();
+		}catch(Exception e){
+			Assertion.failCase();
+		}
+		return null;
+	}
 	/**
 	 * 线程等待 second 秒
 	 * 

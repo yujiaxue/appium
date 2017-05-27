@@ -11,6 +11,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.testng.Assert;
 
+import com.autotest.entrypoint.Context;
+import com.driver.manage.FileUtils;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
 import io.appium.java_client.service.local.flags.GeneralServerFlag;
@@ -20,54 +25,75 @@ import io.appium.java_client.service.local.flags.GeneralServerFlag;
  * 
  * @author zhangfujun appium server appium -p 4492 -bp 2251 -U TA00405HRT
  */
-public class AppiumServer {
+public class AppiumServer extends Context {
 
 	private static ArrayList<String> devices = new ArrayList<String>();
 	public static List<AppiumDriverLocalService> allServer = new ArrayList<AppiumDriverLocalService>();
 	public static HashMap<String, String> serverAndDevice = new HashMap<String, String>();
 	public static List<String> allServertemp = new ArrayList<String>();
 
+	static private int hubport = 4444;
+	static private String hubhost = "0.0.0.0";
+
+	/**
+	 * 获取设备列表
+	 * 
+	 * @return
+	 */
+	public static String getDeivcesJson() {
+		JsonArray json = new JsonArray();
+		for (String device : devices) {
+			json.add(device);
+		}
+		return json.toString();
+	}
 	/**
 	 * 启动appiumServer服务
 	 */
-	public static void startServer(int logname) {
-		String port = "100001";
+	public static void startServer() {
 		AppiumDriverLocalService service;
+		for (String android : devices) {
 			service = new AppiumServiceBuilder().withIPAddress("127.0.0.1").usingAnyFreePort()
-				.withArgument(GeneralServerFlag.SESSION_OVERRIDE)
-				//.withLogFile(new File(UIFlags.LOG_PATH.concat(logname)))
-				//.withAppiumJS(new File("/usr/local/lib/node_modules/appium/build/lib/main.js"))
-				.withArgument(GeneralServerFlag.CONFIGURATION_FILE,
-						"/Users/zhangfujun/Documents/NewLand/uitest/src/main/resources/nodeconfig1.json")
-				.build();
+					.withArgument(GeneralServerFlag.SESSION_OVERRIDE).build();
 			allServertemp.add(service.getUrl().toString());
-		
-		//http://127.0.0.1:30580/wd/hub
-		String tempurl = service.getUrl().toString();
-		port = service.getUrl().toString().substring(tempurl.lastIndexOf(":")+1,tempurl.indexOf("/wd"));
-		
-		System.out.println("startServer ... "+service.getUrl());
-		
-		AppiumServerThread ast = new AppiumServerThread(port, 
-				"/Users/zhangfujun/Documents/NewLand/hxUIAuto/src/main/resources/nodeconfig"+logname+".json");
-		ast.start();
-		
-		if(logname ==0){
-			serverAndDevice.put(service.getUrl().toString(), "192.168.56.101:5555");
+
+			// http://127.0.0.1:30580/wd/hub
+			String tempurl = service.getUrl().toString();
+			String port = service.getUrl().toString().substring(tempurl.lastIndexOf(":") + 1, tempurl.indexOf("/wd"));
+			String fileName = "nodeconfig_" + android + ".json";
+			FileUtils.generateJson(fileName, android, android, "5.0.2", hubport, hubhost);
+
+			AppiumServerThread ast = new AppiumServerThread(port, fileName,config);
+			// "/Users/zhangfujun/Documents/NewLand/hxUIAuto/src/main/resources/nodeconfig"
+			// + logname + ".json"
+			ast.start();
+			serverAndDevice.put(tempurl, android);
 		}
-		if(logname==1){
-			serverAndDevice.put(service.getUrl().toString(), "RW5DOV7SSGUCUCQC");
-		}
-		
-//		service.start();
-//		if (service.isRunning()) {
-		//allServertemp.add(service.getUrl().toString());
-//		}
-//		System.out.println(service.getUrl().toString() + service.isRunning());
 	}
 
-	public static void main(String[] args) {
-		//startServer("test1.log");
+	/**
+	 * 只有一台设备可以使用此方法
+	 * 
+	 * @param logname
+	 */
+	public static void startServerOnlyOneDevice(int logname) {
+		AppiumDriverLocalService service;
+		service = new AppiumServiceBuilder().withIPAddress("127.0.0.1").usingAnyFreePort()
+				.withArgument(GeneralServerFlag.SESSION_OVERRIDE)
+				// .withLogFile(new File(UIFlags.LOG_PATH.concat(logname)))
+				// .withAppiumJS(new
+				// File("/usr/local/lib/node_modules/appium/build/lib/main.js"))
+				// .withArgument(GeneralServerFlag.CONFIGURATION_FILE,
+				// "/Users/zhangfujun/Documents/NewLand/uitest/src/main/resources/nodeconfig1.json")
+				.build();
+		allServertemp.add(service.getUrl().toString());
+
+		service.start();
+		if (service.isRunning()) {
+			allServertemp.add(service.getUrl().toString());
+		}
+		// System.out.println(service.getUrl().toString() +
+		// service.isRunning());
 	}
 
 	/**
@@ -84,13 +110,13 @@ public class AppiumServer {
 			System.out.println("no devices connected ..........");
 			Assert.fail();
 		}
-		System.out.println("serviceNumber ..."+ serviceNumber);
-		for (int i = 0; i < serviceNumber; i++) {
-			//startServer("server" + i + ".log");
-			startServer( i );
-			//serverAndDevice.put(allServer.get(i).getUrl().toString(), devices.get(i));
-			
-		}
+		// System.out.println("serviceNumber ..." + serviceNumber);
+		// for (int i = 0; i < serviceNumber; i++) {
+		// startServer("server" + i + ".log");
+		startServer();
+		// serverAndDevice.put(allServer.get(i).getUrl().toString(),
+		// devices.get(i));
+		// }
 	}
 
 	/**
@@ -99,9 +125,9 @@ public class AppiumServer {
 	 * @return ArrayList
 	 */
 	public static ArrayList<String> getDevices() {
-
 		try {
-			Process p = Runtime.getRuntime().exec("/Users/zhangfujun/Library/Android/sdk/platform-tools/adb devices");
+			/// Users/zhangfujun/Library/Android/sdk/platform-tools/adb
+			Process p = Runtime.getRuntime().exec(config.get("adb") + " devices");
 			BufferedReader readStdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			String temp = "";
 			while ((temp = readStdout.readLine()) != null) {
@@ -119,7 +145,6 @@ public class AppiumServer {
 	public static void launchByDefault() {
 		AppiumDriverLocalService service = AppiumDriverLocalService.buildDefaultService();
 		service.start();
-
 		if (service.isRunning()) {
 			System.out.println(service.getUrl() + "isRunning ...");
 			allServer.add(service);
@@ -148,32 +173,30 @@ public class AppiumServer {
 			e.printStackTrace();
 		}
 	}
-
 }
 
 class AppiumServerThread extends Thread {
 	String port;
 	String jsonPath;
+	HashMap<String, String> config;
 
-	AppiumServerThread(String port, String jsonPath) {
+	AppiumServerThread(String port, String jsonPath, HashMap<String, String> config) {
 		this.port = port;
-		this.jsonPath = jsonPath;
+		this.jsonPath = FileUtils.getAbsolutePath(jsonPath);
+		this.config = config;
 	}
 
 	public void run() {
 		InputStream in = null;
 		try {
-			Process pro = Runtime.getRuntime()
-					.exec(new String[] { "/usr/local/Cellar/node/6.6.0/bin/node", "/usr/local/bin/appium", "-p", port,
-							"--session-override", "--nodeconfig",
-							 jsonPath});//"/Users/zhangfujun/Documents/NewLand/uitest/src/main/resources/nodeconfig1.json"
-			// pro.waitFor();
-			// in = pro.getInputStream();
-			// BufferedReader read = new BufferedReader(new
-			// InputStreamReader(in));
-			// String result = read.readLine();
-			// System.out.println("INFO:"+result);
+			Process pro = Runtime.getRuntime().exec(new String[] { config.get("node"),
+					config.get("appium"), "-p", port, "--session-override", "--nodeconfig", jsonPath });// "/Users/zhangfujun/Documents/NewLand/uitest/src/main/resources/nodeconfig1.json"
 
+			// Process pro = Runtime.getRuntime().exec(new String[] {
+			// "/usr/local/Cellar/node/6.6.0/bin/node",
+			// "/usr/local/bin/appium", "-p", port, "--session-override",
+			// "--nodeconfig", jsonPath });//
+			// "/Users/zhangfujun/Documents/NewLand/uitest/src/main/resources/nodeconfig1.json"
 			pro.waitFor(30, TimeUnit.MINUTES);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,0 +1,19 @@
+{
+	"capabilities": {
+		"deviceName": "RW5DOV7SSGUCUCQC",
+		"browserName": "RW5DOV7SSGUCUCQC",
+		"version": "5.0.2",
+		"maxInstances": 1,
+		"platform": "Android"
+	}],
+	"configuration": {
+		"cleanUpCycle": 2000,
+		"timeout": 60000,
+		"proxy": "org.openqa.grid.selenium.proxy.DefaultRemoteProxy",
+		"maxSession": 1,
+		"register": true,
+		"registerCycle": 5000,
+		"hubPort": 4444,
+		"hubHost": "0.0.0.0"
+	}
+}

@@ -48,4 +48,9 @@ public class UIFlags {
 	public static String WAIT_ACTIVITY = "wait_activity";
 	public static String WAIT_PACKAGE = "wait_package";
 	
+	/**
+	 * json模版
+	 */
+	public static String TEMPLATE="jsonTemplate.txt";
+	
 }

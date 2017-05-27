@@ -1,11 +1,10 @@
 package com.autotest.assertion;
 
-import java.util.Map;
-
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import com.android.uitest.config.Status;
+import com.persist.CaseResult;
+import com.persist.ExecuteDetail;
 import com.persist.api.Operation;
 
 import io.appium.java_client.AppiumDriver;
@@ -14,10 +13,12 @@ public class Assertion {
 
 	static AppiumDriver<?> driver = null;
 	static String sessionId = null;
+	static String deviceId = null;
 
-	public static void setAttr(AppiumDriver<?> entry, String id) {
+	public static void setAttr(AppiumDriver<?> entry, String id, String device) {
 		driver = entry;
 		sessionId = id;
+		deviceId = device;
 	}
 
 	public static void assertViewExist() {
@@ -35,8 +36,8 @@ public class Assertion {
 	 * @param actual
 	 */
 	public static void assertContains(String actual, String expect) {
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				sessionId, "assertContains: " + actual + " contains " + expect, "", System.getProperty(sessionId));
+		ExecuteDetail.save(sessionId, "assertContains: " + actual + " contains " + expect, "",
+				System.getProperty(sessionId), deviceId);
 		if (actual.contains(expect)) {
 
 		} else {
@@ -45,10 +46,10 @@ public class Assertion {
 	}
 
 	public static void assertEquals(String expect, String actual) {
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				sessionId, "assertEquals: "+expect + " vs " + actual, "", System.getProperty(sessionId));
+		ExecuteDetail.save(sessionId, "assertEquals: " + expect + " vs " + actual, "", System.getProperty(sessionId),
+				deviceId);
 		if (expect.equals(actual)) {
-			
+
 		} else {
 			failCase();
 		}
@@ -64,8 +65,7 @@ public class Assertion {
 	public static void noElementFail(String locator, String log, String caseid) {
 		// 用例失败标记，
 		// 脚本中断退出，
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				sessionId, String.format("element not found { %s },%s", locator, log), "", caseid);
+		ExecuteDetail.save(sessionId, String.format("element not found { %s },%s", locator, log), "", caseid, deviceId);
 		failCase();
 	}
 
@@ -85,9 +85,7 @@ public class Assertion {
 		// Map<String, String> r = Operation.getData("select id from case_result
 		// where caseid=? and deviceid=?", caseid,
 		// devicename);
-
-		Operation.insertData("insert into case_result(caseid,deviceid,status) values(?,?,?)", caseid, devicename,
-				Status.FAIL.getArgument());
+		CaseResult.save(caseid, devicename, Status.FAIL.getArgument());
 		fail();
 	}
 }

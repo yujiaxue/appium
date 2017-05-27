@@ -7,9 +7,27 @@ public class AppTest {
 	public static int id;
 	public static long executeid;
 	public static String status;
+	public static String devices;
+	public static String appName;
+	
+	public static String getAppName() {
+		return appName;
+	}
 
-	public static void save() {
-		Operation.insertData("insert into apptest(executeId) value(?)", getExecuteid());
+	public static void setAppName(String appName) {
+		AppTest.appName = appName;
+	}
+
+	public static String getDevices() {
+		return devices;
+	}
+
+	public static void setDevices(String devices) {
+		AppTest.devices = devices;
+	}
+
+	public static int save() {
+		return Operation.insertData("insert into apptest(executeId,devices) value(?,?)", getExecuteid(),getDevices());
 	}
 
 	public static void updateStatus() {
