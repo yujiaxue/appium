@@ -27,7 +27,7 @@ public class AppTest {
 	}
 
 	public static int save() {
-		return Operation.insertData("insert into apptest(executeId,devices) value(?,?)", getExecuteid(),getDevices());
+		return Operation.insertData("insert into apptest(executeId,devices,appName) value(?,?,?)", getExecuteid(),getDevices(),getAppName());
 	}
 
 	public static void updateStatus() {
