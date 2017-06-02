@@ -71,11 +71,4 @@
 
 	</build>
 	
-	<distributionManagement>
-	    <repository>
-	      <id>Releases</id>
-	      <name>qa-release</name>
-	      <url>http://nexus.corp.rs.com/nexus/content/repositories/releases/</url>
-	    </repository>
-  </distributionManagement>
 </project>
