@@ -22,11 +22,12 @@ public class ActionListener extends Context implements SearchingEventListener {
 		// System.out.println("------not null " + element.getText());
 		// }
 		String id = ((AppiumDriver<?>) driver).getSessionId().toString();
+		String device = ((AppiumDriver<?>) driver).getCapabilities().getCapability("udid").toString();
 		String caseId = System.getProperty(id);
 		System.out.println(
 				"afterFindBy-------" + (MobileElement) element + "----" + by.toString() + "---" + driver.toString());
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)", id,
-				String.format("Before Find Element { %s }", by.toString()), fileName, caseId);
+		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId,deviceName) values(?,?,?,?,?)", id,
+				String.format("Before Find Element { %s }", by.toString()), fileName, caseId,device);
 	}
 
 	@Override

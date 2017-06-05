@@ -1,0 +1,24 @@
+{
+  "capabilities":
+      [
+        {
+        "deviceName":"%s",
+          "browserName": "%s",
+          "version":"%s",
+          "maxInstances": 1,
+          "platform":"Android"
+        }
+      ],
+  "configuration":
+  {
+    "cleanUpCycle":2000,
+    "timeout":60000,
+    "proxy": "org.openqa.grid.selenium.proxy.DefaultRemoteProxy",
+    
+    "maxSession": 1,
+    "register": true,
+    "registerCycle": 5000,
+    "hubPort": %d,
+    "hubHost": "%s"
+  }
+}

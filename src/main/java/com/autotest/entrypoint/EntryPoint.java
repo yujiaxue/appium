@@ -54,7 +54,7 @@ public class EntryPoint {
 		this.driver = driver;
 		touchAction = new TouchAction(this.driver);
 		this.sessionId = this.driver.getSessionId().toString();
-		Assertion.setAttr(this.driver, this.sessionId,getDeviceId());
+		Assertion.setAttr(this.driver, this.sessionId, getDeviceId());
 	}
 
 	public String getSessionId() {
@@ -99,7 +99,8 @@ public class EntryPoint {
 			e.printStackTrace();
 			// 用例失败标记，
 			// 脚本中断退出，未知异常
-			ExecuteDetail.save(sessionId, String.format("unknown error { %s ,%s}", locator, e.getMessage()), "", caseId, getDeviceId());
+			ExecuteDetail.save(sessionId, String.format("unknown error { %s ,%s}", locator, e.getMessage()), "", caseId,
+					getDeviceId());
 			Assertion.failCase();
 		}
 		return ele;
@@ -116,14 +117,15 @@ public class EntryPoint {
 		By type = TypeCheck.getLocatorType(locator);
 		List<WebElement> eles = null;
 		try {
-			
+
 			eles = (List<WebElement>) driver.findElements(type);
-			ExecuteDetail.save(sessionId, String.format("getElements by { %s } ", locator), "",caseId, getDeviceId());
+			ExecuteDetail.save(sessionId, String.format("getElements by { %s } ", locator), "", caseId, getDeviceId());
 		} catch (NoSuchElementException e) {
 			Assertion.noElementFail(locator, e.getMessage(), String.valueOf(getCaseId()));
 		} catch (Exception e) {
 			e.printStackTrace();
-			ExecuteDetail.save(sessionId, String.format("getElements by { %s } fail { %s }", locator, e.getMessage()),"", caseId, getDeviceId());
+			ExecuteDetail.save(sessionId, String.format("getElements by { %s } fail { %s }", locator, e.getMessage()),
+					"", caseId, getDeviceId());
 			Assertion.failCase();
 		}
 		return eles;
@@ -141,7 +143,7 @@ public class EntryPoint {
 		try {
 			ele = driver.findElement(type);
 		} catch (NoSuchElementException e) {
-			System.out.println("Element isnot found :" + locator + " :" + e.getMessage().toString());
+			Assertion.noElementFail(locator, e.getMessage().toString(), getCaseId());
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -162,8 +164,8 @@ public class EntryPoint {
 			me.click();
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-					getSessionId(), String.format("Click Element { %s }, { %s }", locator, log), fileName, getCaseId());
+			ExecuteDetail.save(sessionId, String.format("Click Element { %s }, { %s } on device { %s },{ %s }", locator,
+					log, getDeviceId(), e.getMessage()), fileName, caseId, getDeviceId());
 			Assertion.failCase();
 		}
 	}
@@ -183,15 +185,17 @@ public class EntryPoint {
 		try {
 			ele.sendKeys(text);
 			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
+			Operation.insertData(
+					"insert into executeDetail(sessionId,stepName,imageName,caseId，deviceName) values(?,?,?,?,?)",
 					getSessionId(), String.format("enter { %s } to Element { %s }, { %s }", text, locator, log),
-					fileName, getCaseId());
+					fileName, getCaseId(), getDeviceId());
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
+			Operation.insertData(
+					"insert into executeDetail(sessionId,stepName,imageName,caseId,deviceName) values(?,?,?,?,?)",
 					getSessionId(),
 					String.format("enter { %s } to Element { %s }, { %s }", text, locator, e.getMessage()), fileName,
-					getCaseId());
+					getCaseId(), getDeviceId());
 			Assertion.failCase();
 		}
 	}
@@ -220,12 +224,12 @@ public class EntryPoint {
 		try {
 			text = ele.getText();
 			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-					getSessionId(), String.format("getText from  Element { %s }", locator), fileName, getCaseId());
+			ExecuteDetail.save(sessionId, String.format("getText from  Element { %s }", locator), fileName, caseId,
+					getDeviceId());
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-					getSessionId(), String.format("getText from  Element { %s }", locator), fileName, getCaseId());
+			ExecuteDetail.save(sessionId, String.format("getText from  Element { %s }", locator), fileName, caseId,
+					getDeviceId());
 			Assertion.failCase();
 		}
 		return text;
@@ -261,12 +265,13 @@ public class EntryPoint {
 					break;
 				}
 			}
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-					getSessionId(), String.format("switch To webview: { %s }", webview), "", getCaseId());
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("switch To webview: { %s }", webview), fileName, caseId,
+					getDeviceId());
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-					getSessionId(), String.format("switch To webview: { %s }", webview), fileName, getCaseId());
+			ExecuteDetail.save(sessionId, String.format("switch To webview: { %s }", webview), fileName, caseId,
+					getDeviceId());
 			Assertion.failCase();
 		}
 	}
@@ -277,8 +282,8 @@ public class EntryPoint {
 	 * @return
 	 */
 	public boolean isBrowser() {
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(), "check current window is webview", "", getCaseId());
+		String fileName = TakeScreen.takeSreen(driver);
+		ExecuteDetail.save(sessionId, "check current window is webview", fileName, caseId, getDeviceId());
 		return driver.isBrowser();
 	}
 
@@ -297,11 +302,12 @@ public class EntryPoint {
 	};
 
 	/**
-	 * 能够完成下啦刷新 depreated
+	 * 能够完成下啦刷新 depreated 暂不用
 	 * 
 	 * @param text
 	 * @return
 	 */
+	@Deprecated
 	public MobileElement scrollFresh(String text) {
 		return (MobileElement) driver.findElement(MobileBy.AndroidUIAutomator("new UiScrollable(new UiSelector()"
 				+ ".scrollable(true)).scrollIntoView(resourceId(\"android:id/vp_activity_main\")).scrollIntoView("
@@ -317,15 +323,15 @@ public class EntryPoint {
 		int endX = startX;
 		int endY = getScreenSize().height;
 		this.touchAction.longPress(startX, startY).moveTo(0, endY - 300).release();
-		//this.touchAction.longPress(540,200).moveTo(540,1050).release();
+		// this.touchAction.longPress(540,200).moveTo(540,1050).release();
 		this.touchAction.perform();
 		String fileName = TakeScreen.takeSreen(driver);
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(),
+		ExecuteDetail.save(sessionId,
 				String.format("After scrollUp from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, endX, endY),
-				fileName, getCaseId());
+				fileName, caseId, getDeviceId());
 	}
+
 	/**
 	 * 向上滚动半屏,首屏刷新
 	 */
@@ -337,13 +343,11 @@ public class EntryPoint {
 		this.touchAction.longPress(startX, startY).moveTo(0, endY - 300).release();
 		this.touchAction.perform();
 		String fileName = TakeScreen.takeSreen(driver);
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(),
+		ExecuteDetail.save(sessionId,
 				String.format("After scrollUp from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, endX, endY),
-				fileName, getCaseId());
+				fileName, caseId, getDeviceId());
 	}
-
 
 	/**
 	 * 向下滚动一屏
@@ -355,11 +359,11 @@ public class EntryPoint {
 		int endY = 300;
 		this.touchAction.longPress(startX, startY).moveTo(0, endY).release();
 		this.touchAction.perform();
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(),
+		String fileName = TakeScreen.takeSreen(driver);
+		ExecuteDetail.save(sessionId,
 				String.format("After scrollDown from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, endX, endY),
-				"", getCaseId());
+				fileName, caseId, getDeviceId());
 	}
 
 	/**
@@ -371,33 +375,35 @@ public class EntryPoint {
 		int endX = startX;
 		int endY = 300;
 		touchAction.longPress(startX, startY).moveTo(0, endY).release();
-		//touchAction.longPress(startX, getScreenSize().height-200).moveTo(startX, endY).release();
+		// touchAction.longPress(startX,
+		// getScreenSize().height-200).moveTo(startX, endY).release();
 		touchAction.perform();
 		String fileName = TakeScreen.takeSreen(driver);
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(),
+		ExecuteDetail.save(sessionId,
 				String.format("After scrollDown from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, endX, endY),
-				fileName, getCaseId());
+				fileName, caseId, getDeviceId());
 	}
 
 	/**
-	 * swipeLeft  
-	 * @param ele 根据元素的中心坐标swipeLeft
+	 * swipeLeft
+	 * 
+	 * @param ele
+	 *            根据元素的中心坐标swipeLeft
 	 */
 	public void swipeLeft(WebElement ele) {
-		Point p = ((MobileElement) ele).getCenter(); 
+		Point p = ((MobileElement) ele).getCenter();
 		int startX = p.x;
 		int startY = p.y;
 		int endY = startY;
 		TouchAction ta = new TouchAction(driver);
-		//ta.longPress(startX, startY).moveTo(-stepX, 0).release();
-		//ta.longPress(1000,1600).moveTo(100, 1600).release();
-		ta.longPress(startX,startY).moveTo(100, startY).release();
+		// ta.longPress(startX, startY).moveTo(-stepX, 0).release();
+		// ta.longPress(1000,1600).moveTo(100, 1600).release();
+		ta.longPress(startX, startY).moveTo(100, startY).release();
 		ta.perform();
-//		ta.longPress(1000,1600).moveTo(100, 1600).release();
-//		ta.perform();
-		
+		// ta.longPress(1000,1600).moveTo(100, 1600).release();
+		// ta.perform();
+
 		// int startX = 10; //getScreenSize().width / 2;
 		// int startY = getScreenSize().height - 200;
 		// int endX = startX;
@@ -412,45 +418,54 @@ public class EntryPoint {
 		// { endX=%d,endY=%d }", startX,
 		// startY, endX, endY),
 		// "", getCaseId());
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(),
+		String fileName = TakeScreen.takeSreen(driver);
+		ExecuteDetail.save(sessionId,
 				String.format("After swipeLeft from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, 100, endY),
-				"", getCaseId());
+				fileName, caseId, getDeviceId());
 	}
-	
+
 	/**
-	 * swipeLeft  
-	 * @param startY 根据y坐标
+	 * swipeLeft
+	 * 
+	 * @param startY
+	 *            根据y坐标
 	 */
 	public void swipeLeft(int startY) {
-		int startX = getScreenSize().width-100;
-		touchAction.longPress(startX,startY).moveTo(100, startY).release();
+		int startX = getScreenSize().width - 100;
+		touchAction.longPress(startX, startY).moveTo(100, startY).release();
 		touchAction.perform();
 		String fileName = TakeScreen.takeSreen(driver);
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(),
+		ExecuteDetail.save(sessionId,
 				String.format("After swipeLeft from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, 100, startY),
-				fileName, getCaseId());
+				fileName, caseId, getDeviceId());
 	}
+
 	/**
 	 * swipeRight
-	 * @param startY 根据y坐标
+	 * 
+	 * @param startY
+	 *            根据y坐标
 	 */
 	public void swipeRight(int startY) {
-		int startX = getScreenSize().width-100;
-		touchAction.longPress(100,startY).moveTo(startX, startY).release();
+		int startX = getScreenSize().width - 100;
+		touchAction.longPress(100, startY).moveTo(startX, startY).release();
 		touchAction.perform();
 		String fileName = TakeScreen.takeSreen(driver);
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(),
+		ExecuteDetail.save(sessionId,
 				String.format("After swipeRight from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", 100,
 						startY, startX, startY),
-				fileName, getCaseId());
+				fileName, caseId, getDeviceId());
 	}
 
-
+	/**
+	 * 暂不用
+	 * 
+	 * @param text
+	 * @return
+	 */
+	@Deprecated
 	public WebElement findElementByScroll(String text) {
 		WebElement e = getElement("com.redstar.mainapp:id/tv_title");
 		System.out.println(e.getText());
@@ -460,7 +475,7 @@ public class EntryPoint {
 	/**
 	 * 返回屏幕尺寸
 	 * 
-	 * @return
+	 * @return Dimension
 	 */
 	public Dimension getScreenSize() {
 		return ((AndroidDriver<?>) driver).manage().window().getSize();
@@ -470,6 +485,10 @@ public class EntryPoint {
 	// public Dimension getScrollXY(){
 	// //getScreenSize().height
 	// }
+	/**
+	 * 暂不用
+	 */
+	@Deprecated
 	public void scrollToEle(String text) {
 
 		//
@@ -520,60 +539,44 @@ public class EntryPoint {
 			driver.context("NATIVE_APP");
 		}
 		touchAction.tap(p.x, p.y).perform().release();
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-				getSessionId(), String.format("tap click element { %s } by location { x=%d,y=%d }", ele, p.x, p.y), "",
-				getCaseId());
+
+		String fileName = TakeScreen.takeSreen(driver);
+		ExecuteDetail.save(sessionId,
+				String.format("tap click element { %s } by location { x=%d,y=%d }", ele, p.x, p.y), fileName, caseId,
+				getDeviceId());
 		if (!driver.isBrowser()) {
 			switchToWebView();
 		}
 	}
 
+	/**
+	 * 执行js
+	 */
 	public void executeJs(String js) {
 		((JavascriptExecutor) driver).executeScript(js);
-	}
-
-	public void test() {
-		// System.out.println(((HasSessionDetails) driver).getPlatformName());
-		// System.out.println(driver.getAutomationName());
-		// HashMap<String, String> arguments = new HashMap<String, String>();
-		// arguments.put("direction", "down");
-		// driver.executeScript("mobile: scroll", arguments);
-		// driver.executeScript("mobile: scroll", arguments);
-
-		TouchAction touchAction = new TouchAction(driver);
-
-		//
-		// WebElement e = driver.findElementByAccessibilityId("好物清单");
-		// //WebElement element = driver.findElement(By.id("my-id"));
-		// Actions actions = new Actions(driver);
-		// actions.moveToElement(e).release().perform();
-
-		TouchAction swipe = new TouchAction(driver).press(540, 300).moveTo(540, 1050).release();
-		swipe.perform();
 	}
 
 	/**
 	 * 按下keycode
 	 */
 	public void pressKeyCode(int code) {
-		((AndroidDriver<?>) driver).pressKeyCode(code);
+		try {
+			((AndroidDriver<?>) driver).pressKeyCode(code);
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("After press key_code 66 { Enter }"), fileName, caseId,
+					getDeviceId());
+		} catch (Throwable t) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("After press key_code 66 { Enter }, %s", t.getMessage()),
+					fileName, caseId, getDeviceId());
+		}
 	}
 
 	/**
 	 * 无submit的search
 	 */
 	public void searchSubmit() {
-		try {
-			((AndroidDriver<?>) driver).pressKeyCode(66);
-			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-					getSessionId(), String.format("After press key_code 66 { Enter }"), fileName, getCaseId());
-		} catch (Throwable t) {
-			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)",
-					getSessionId(), String.format("After press key_code 66 { Enter }, %s", t.getMessage()), fileName,
-					getCaseId());
-		}
+		pressKeyCode(66);
 	}
 
 	private void putCaseId() {
@@ -584,7 +587,15 @@ public class EntryPoint {
 	 * 切换到NATIVE_APP
 	 */
 	public void switchNative() {
-		driver.context("NATIVE_APP");
+		try {
+			driver.context("NATIVE_APP");
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, "switch context NATIVE_APP", fileName, caseId, getDeviceId());
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("switch context NATIVE_APP { %s }", e.getMessage()), fileName,
+					caseId, getDeviceId());
+		}
 	}
 
 	/**
@@ -593,14 +604,37 @@ public class EntryPoint {
 	 * @return
 	 */
 	public String getPageSource() {
-		return driver.getPageSource();
+		String pagesource = null;
+		try {
+			pagesource = driver.getPageSource();
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("getPageSource { %s }", "success"), fileName, caseId,
+					getDeviceId());
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("getPageSource { %s }", "fail"), fileName, caseId,
+					getDeviceId());
+		}
+		return pagesource;
 	}
 
 	/**
 	 * 获取当前的所有context
 	 */
 	public Set<String> getContext() {
-		return driver.getContextHandles();
+		Set<String> allContext = null;
+		try {
+			allContext = driver.getContextHandles();
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("get All Context { %s }", allContext.toString()), fileName,
+					caseId, getDeviceId());
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId,
+					String.format("get All Context { %s },{ %s }", allContext.toString(), e.getMessage()), fileName,
+					caseId, getDeviceId());
+		}
+		return allContext;
 	}
 
 	/**
@@ -609,7 +643,18 @@ public class EntryPoint {
 	 * @return
 	 */
 	public String getCurrentContext() {
-		return driver.getContext();
+		String context = null;
+		try {
+			context = driver.getContext();
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("current Context { %s }", context), fileName, caseId,
+					getDeviceId());
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("current Context { %s }, { %s }", context, e.getMessage()),
+					fileName, caseId, getDeviceId());
+		}
+		return context;
 	}
 
 	/**
@@ -625,12 +670,22 @@ public class EntryPoint {
 	 * 返回app首屏Activity
 	 */
 	public void backHome() {
+		String packageTo = "com.redstar.mainapp";
+		String activity = ".business.LaunchActivity";
+		try {
+			Activity home = new Activity(packageTo, activity);
+			((AndroidDriver<?>) driver).startActivity(home);
+			putCaseId();
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("启动activity { %s , %s }", packageTo, activity), fileName,
+					caseId, getDeviceId());
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId,
+					String.format("启动activity { %s , %s };exception { %s }", packageTo, activity, e.getMessage()),
+					fileName, caseId, getDeviceId());
+		}
 
-		// Activity home = new Activity("com.redstar.mainapp",
-		// "com.redstar.mainapp.business.main.MainActivity");
-		Activity home = new Activity("com.redstar.mainapp", ".business.LaunchActivity");
-		((AndroidDriver<?>) driver).startActivity(home);
-		putCaseId();
 	}
 
 	/**
@@ -640,21 +695,30 @@ public class EntryPoint {
 	 * @return
 	 */
 	public Object getCapability(String key) {
-		return driver.getCapabilities().getCapability(key);
+		Object cap = null;
+		try {
+			cap = driver.getCapabilities().getCapability(key);
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("获取capability key= { %s },value={ %s }", key, cap), fileName,
+					caseId, getDeviceId());
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId,
+					String.format("获取capability key= { %s },value={ %s };exception { %s }", key, cap, e.getMessage()),
+					fileName, caseId, getDeviceId());
+		}
+		return cap;
 	}
+
 	/**
 	 * 获取设备id
+	 * 
 	 * @return
 	 */
-	public String getDeviceId(){
-		//插入记录
-		try{
-			return getCapability("udid").toString();
-		}catch(Exception e){
-			Assertion.failCase();
-		}
-		return null;
+	public String getDeviceId() {
+		return getCapability("udid").toString();
 	}
+
 	/**
 	 * 线程等待 second 秒
 	 * 
@@ -663,8 +727,12 @@ public class EntryPoint {
 	public void sleep(int second) {
 		try {
 			Thread.sleep(second * 1000);
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("线程等待 { %s 秒 }", second), fileName, caseId, getDeviceId());
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("线程等待 { %s 秒 }，exception {%s}", second, e.getMessage()),
+					fileName, caseId, getDeviceId());
 		}
 	}
 
@@ -677,16 +745,43 @@ public class EntryPoint {
 		sleep(5);
 	}
 
+	/**
+	 * 获取当前设备的显示密度
+	 * 
+	 * @return
+	 */
 	public long getDisplayDensity() {
-		return ((HasDeviceDetails) driver).getDisplayDensity();
-		// ((AndroidDriver)driver).openNotifications();
+		long density = 0;
+		try {
+			density = ((HasDeviceDetails) driver).getDisplayDensity();
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("getDisplayDensity { %s }", density), fileName, caseId,
+					getDeviceId());
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("getDisplayDensity { %s }", density), fileName, caseId,
+					getDeviceId());
+		}
+		return density;
 	}
 
+	/**
+	 * 获取当前activity
+	 * 
+	 * @return
+	 */
 	public String currentActity() {
-		return ((StartsActivity) driver).currentActivity(); // ((AndroidDriver<?>)
+		String currentActivity = null;
+		try {
+			currentActivity = ((StartsActivity) driver).currentActivity();
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("currentActivity { %s }", currentActivity), fileName, caseId,
+					getDeviceId());
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("currentActivity { %s }", currentActivity), fileName, caseId,
+					getDeviceId());
+		}
+		return currentActivity;
 	}
-
-	// public stopApp(){
-	// ((AndroidDriver)driver).s
-	// }
 }

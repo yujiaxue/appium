@@ -39,7 +39,7 @@ public class AppAndroidDriver {
 		capabilities.setCapability(MobileCapabilityType.APP, app.getAbsolutePath());
 		capabilities.setCapability(MobileCapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
 		capabilities.setCapability(MobileCapabilityType.VERSION, 5.1);
-		capabilities.setCapability(MobileCapabilityType.UDID, config.get("udid"));
+		capabilities.setCapability(MobileCapabilityType.UDID, config.get(UIFlags.UDID));
 		capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 120);
 		capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM);
 		capabilities.setCapability(MobileCapabilityType.CLEAR_SYSTEM_FILES, true);

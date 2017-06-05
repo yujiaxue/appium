@@ -18,11 +18,13 @@ public class ExceptionListener implements ListensToException{
 			System.out.println(st[i]);
 		}
 		System.out.println("onException............................end");
-		
+		String id = ((AppiumDriver<?>) driver).getSessionId().toString();
+		String device = ((AppiumDriver<?>) driver).getCapabilities().getCapability("udid").toString();
+		String caseId = System.getProperty(id);
 		
 		String fileName = TakeScreen.takeSreen(driver);
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName) values(?,?,?)",
-				((AppiumDriver) driver).getSessionId().toString(), "异常中断", fileName);
+		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId,deviceName) values(?,?,?,?,?)",
+				id, "异常中断", fileName,caseId,device);
 	}
 
 }

@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.testng.Assert;
 
+import com.android.uitest.driver.UIFlags;
 import com.autotest.entrypoint.Context;
 import com.driver.manage.FileUtils;
 import com.google.gson.JsonArray;
@@ -48,9 +49,22 @@ public class AppiumServer extends Context {
 		return json.toString();
 	}
 	/**
+	 * chage hub
+	 */
+	public static void hub(){
+		try{
+			hubhost = config.get(UIFlags.HUBHOST);
+			hubport = Integer.parseInt(config.get(UIFlags.HUBPORT));
+			System.out.println(String.format("Hub host is change : %s %d ",hubhost,hubport));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	/**
 	 * 启动appiumServer服务
 	 */
 	public static void startServer() {
+		hub();
 		AppiumDriverLocalService service;
 		for (String android : devices) {
 			service = new AppiumServiceBuilder().withIPAddress("127.0.0.1").usingAnyFreePort()
@@ -62,7 +76,6 @@ public class AppiumServer extends Context {
 			String port = service.getUrl().toString().substring(tempurl.lastIndexOf(":") + 1, tempurl.indexOf("/wd"));
 			String fileName = "nodeconfig_" + android + ".json";
 			FileUtils.generateJson(fileName, android, android, "5.0.2", hubport, hubhost);
-
 			AppiumServerThread ast = new AppiumServerThread(port, fileName,config);
 			// "/Users/zhangfujun/Documents/NewLand/hxUIAuto/src/main/resources/nodeconfig"
 			// + logname + ".json"

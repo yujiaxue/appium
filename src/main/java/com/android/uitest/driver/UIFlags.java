@@ -1,7 +1,13 @@
 package com.android.uitest.driver;
 
 public class UIFlags {
-
+	/**
+	 * hub 
+	 */
+	public static final String HUBHOST = "hubhost";
+	public static final String HUBPORT = "hubport";
+	
+	
 	/**
 	 * android apk path
 	 */

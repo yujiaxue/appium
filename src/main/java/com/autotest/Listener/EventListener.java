@@ -20,9 +20,10 @@ public class EventListener implements ElementEventListener {
 	public void afterClickOn(WebElement element, WebDriver driver) {
 		String fileName = TakeScreen.takeSreen(driver);
 		String id = ((AppiumDriver<?>) driver).getSessionId().toString();
+		String device = ((AppiumDriver<?>) driver).getCapabilities().getCapability("udid").toString();
 		String caseId = System.getProperty(id);
-		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)", id,
-				String.format("After Click Element { %s }", element.toString()), fileName, caseId);
+		Operation.insertData("insert into executeDetail(sessionId,stepName,imageName,caseId,deviceName) values(?,?,?,?,?)", id,
+				String.format("After Click Element { %s }", element.toString()), fileName, caseId,device);
 	}
 
 	@Override

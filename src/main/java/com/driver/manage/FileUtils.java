@@ -16,6 +16,8 @@ import java.util.Properties;
 
 import com.android.uitest.driver.UIFlags;
 
+import net.sourceforge.htmlunit.corejs.javascript.GeneratedClassLoader;
+
 public class FileUtils {
 	BufferedReader in = null;
 	static FileUtils fu = null;
