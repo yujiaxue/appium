@@ -12,13 +12,13 @@ public class ExecuteDetail {
 	public String imageName;
 	public Date createTime;
 	public String deviceName;
-	public static String sql = "insert into executeDetail(sessionId,stepName,imageName,caseId) values(?,?,?,?)";
+	public static String sql = "insert into executeDetail(sessionId,stepName,imageName,caseId,deviceName) values(?,?,?,?,?)";
 
 	/**
 	 * 保存
 	 */
 	public static void save(String sessionId, String stepName, String imageName, String caseId, String deviceName) {
-		Operation.insertData(sql, sessionId, stepName, imageName, System.getProperty(sessionId), deviceName);
+		Operation.insertData(sql, sessionId, stepName, imageName, caseId, deviceName);
 	}
 
 	public String getDeviceName() {

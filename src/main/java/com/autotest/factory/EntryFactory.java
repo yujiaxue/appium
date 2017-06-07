@@ -26,7 +26,7 @@ public class EntryFactory {
 		} else if (automation.equalsIgnoreCase(AutoMation.SAFARI.getArgument())) {
 
 		}
-		EntryPoint point = new EntryPoint(driver);
+		EntryPoint point = new EntryPoint(driver,config.get(UIFlags.UDID));
 		return point;
 	}
 

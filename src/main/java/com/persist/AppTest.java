@@ -9,7 +9,7 @@ public class AppTest {
 	public static String status;
 	public static String devices;
 	public static String appName;
-	
+
 	public static String getAppName() {
 		return appName;
 	}
@@ -23,29 +23,36 @@ public class AppTest {
 	}
 
 	public static void setDevices(String devices) {
-		AppTest.devices = devices;
+		if (devices.startsWith("[") & devices.endsWith("]")) {
+			AppTest.devices = devices.substring(1, devices.length() - 1);
+		} else {
+			AppTest.devices = devices;
+		}
 	}
 
 	public static int save() {
-		return Operation.insertData("insert into apptest(executeId,devices,appName) value(?,?,?)", getExecuteid(),getDevices(),getAppName());
+		return Operation.insertData("insert into apptest(executeId,devices,appName) value(?,?,?)", getExecuteid(),
+				getDevices(), getAppName());
 	}
 
 	public static void updateStatus() {
 		Operation.insertData("update apptest set status=? where executeid=?", getStatus(), getExecuteid());
 	}
+
 	/**
 	 * 当前是否有测试在执行
+	 * 
 	 * @return
 	 */
-	public String getRun(){
+	public String getRun() {
 		return "run";
 	}
 
-	public static  int getId() {
+	public static int getId() {
 		return id;
 	}
 
-	public static  void setId(int id) {
+	public static void setId(int id) {
 		AppTest.id = id;
 	}
 

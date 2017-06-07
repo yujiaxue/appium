@@ -30,8 +30,9 @@ import io.appium.java_client.android.StartsActivity;
 public class EntryPoint {
 	AppiumDriver<?> driver = null;
 	String sessionId = null;
-	String caseId = "";
+	String caseId = null;
 	TouchAction touchAction = null;
+	String device = null;
 	// int executeId =0;
 
 	// public int getExecuteId() {
@@ -48,13 +49,15 @@ public class EntryPoint {
 
 	public void setCaseId(String caseId) {
 		this.caseId = caseId;
+		System.out.println("设置caseId ..."+ this.caseId);
 	}
 
-	public EntryPoint(AppiumDriver<WebElement> driver) {
+	public EntryPoint(AppiumDriver<WebElement> driver,String device) {
 		this.driver = driver;
+		this.device = device;
 		touchAction = new TouchAction(this.driver);
 		this.sessionId = this.driver.getSessionId().toString();
-		Assertion.setAttr(this.driver, this.sessionId, getDeviceId());
+		Assertion.setAttr(this.driver, this.sessionId, device);
 	}
 
 	public String getSessionId() {
@@ -100,7 +103,7 @@ public class EntryPoint {
 			// 用例失败标记，
 			// 脚本中断退出，未知异常
 			ExecuteDetail.save(sessionId, String.format("unknown error { %s ,%s}", locator, e.getMessage()), "", caseId,
-					getDeviceId());
+					device);
 			Assertion.failCase();
 		}
 		return ele;
@@ -119,13 +122,13 @@ public class EntryPoint {
 		try {
 
 			eles = (List<WebElement>) driver.findElements(type);
-			ExecuteDetail.save(sessionId, String.format("getElements by { %s } ", locator), "", caseId, getDeviceId());
+			ExecuteDetail.save(sessionId, String.format("getElements by { %s } ", locator), "", caseId, device);
 		} catch (NoSuchElementException e) {
 			Assertion.noElementFail(locator, e.getMessage(), String.valueOf(getCaseId()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			ExecuteDetail.save(sessionId, String.format("getElements by { %s } fail { %s }", locator, e.getMessage()),
-					"", caseId, getDeviceId());
+					"", caseId, device);
 			Assertion.failCase();
 		}
 		return eles;
@@ -165,7 +168,7 @@ public class EntryPoint {
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("Click Element { %s }, { %s } on device { %s },{ %s }", locator,
-					log, getDeviceId(), e.getMessage()), fileName, caseId, getDeviceId());
+					log, device, e.getMessage()), fileName, caseId, device);
 			Assertion.failCase();
 		}
 	}
@@ -185,17 +188,12 @@ public class EntryPoint {
 		try {
 			ele.sendKeys(text);
 			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData(
-					"insert into executeDetail(sessionId,stepName,imageName,caseId，deviceName) values(?,?,?,?,?)",
-					getSessionId(), String.format("enter { %s } to Element { %s }, { %s }", text, locator, log),
-					fileName, getCaseId(), getDeviceId());
+			ExecuteDetail.save(sessionId, String.format("enter { %s } to Element { %s }, { %s }", text, locator, log),
+					fileName, caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			Operation.insertData(
-					"insert into executeDetail(sessionId,stepName,imageName,caseId,deviceName) values(?,?,?,?,?)",
-					getSessionId(),
-					String.format("enter { %s } to Element { %s }, { %s }", text, locator, e.getMessage()), fileName,
-					getCaseId(), getDeviceId());
+			ExecuteDetail.save(sessionId, String.format("enter { %s } to Element { %s }, { %s }", text, locator, e.getMessage()),
+					fileName, caseId, device);
 			Assertion.failCase();
 		}
 	}
@@ -225,11 +223,11 @@ public class EntryPoint {
 			text = ele.getText();
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("getText from  Element { %s }", locator), fileName, caseId,
-					getDeviceId());
+					device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("getText from  Element { %s }", locator), fileName, caseId,
-					getDeviceId());
+					device);
 			Assertion.failCase();
 		}
 		return text;
@@ -267,11 +265,11 @@ public class EntryPoint {
 			}
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("switch To webview: { %s }", webview), fileName, caseId,
-					getDeviceId());
+					device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("switch To webview: { %s }", webview), fileName, caseId,
-					getDeviceId());
+					device);
 			Assertion.failCase();
 		}
 	}
@@ -283,7 +281,7 @@ public class EntryPoint {
 	 */
 	public boolean isBrowser() {
 		String fileName = TakeScreen.takeSreen(driver);
-		ExecuteDetail.save(sessionId, "check current window is webview", fileName, caseId, getDeviceId());
+		ExecuteDetail.save(sessionId, "check current window is webview", fileName, caseId, device);
 		return driver.isBrowser();
 	}
 
@@ -329,7 +327,7 @@ public class EntryPoint {
 		ExecuteDetail.save(sessionId,
 				String.format("After scrollUp from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, endX, endY),
-				fileName, caseId, getDeviceId());
+				fileName, caseId, device);
 	}
 
 	/**
@@ -346,7 +344,7 @@ public class EntryPoint {
 		ExecuteDetail.save(sessionId,
 				String.format("After scrollUp from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, endX, endY),
-				fileName, caseId, getDeviceId());
+				fileName, caseId, device);
 	}
 
 	/**
@@ -363,7 +361,7 @@ public class EntryPoint {
 		ExecuteDetail.save(sessionId,
 				String.format("After scrollDown from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, endX, endY),
-				fileName, caseId, getDeviceId());
+				fileName, caseId, device);
 	}
 
 	/**
@@ -382,7 +380,7 @@ public class EntryPoint {
 		ExecuteDetail.save(sessionId,
 				String.format("After scrollDown from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, endX, endY),
-				fileName, caseId, getDeviceId());
+				fileName, caseId, device);
 	}
 
 	/**
@@ -422,7 +420,7 @@ public class EntryPoint {
 		ExecuteDetail.save(sessionId,
 				String.format("After swipeLeft from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, 100, endY),
-				fileName, caseId, getDeviceId());
+				fileName, caseId, device);
 	}
 
 	/**
@@ -439,7 +437,7 @@ public class EntryPoint {
 		ExecuteDetail.save(sessionId,
 				String.format("After swipeLeft from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", startX,
 						startY, 100, startY),
-				fileName, caseId, getDeviceId());
+				fileName, caseId, device);
 	}
 
 	/**
@@ -456,7 +454,7 @@ public class EntryPoint {
 		ExecuteDetail.save(sessionId,
 				String.format("After swipeRight from { startX=%d,startY=%d } scroll to { endX=%d,endY=%d }", 100,
 						startY, startX, startY),
-				fileName, caseId, getDeviceId());
+				fileName, caseId, device);
 	}
 
 	/**
@@ -543,7 +541,7 @@ public class EntryPoint {
 		String fileName = TakeScreen.takeSreen(driver);
 		ExecuteDetail.save(sessionId,
 				String.format("tap click element { %s } by location { x=%d,y=%d }", ele, p.x, p.y), fileName, caseId,
-				getDeviceId());
+				device);
 		if (!driver.isBrowser()) {
 			switchToWebView();
 		}
@@ -564,11 +562,11 @@ public class EntryPoint {
 			((AndroidDriver<?>) driver).pressKeyCode(code);
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("After press key_code 66 { Enter }"), fileName, caseId,
-					getDeviceId());
+					device);
 		} catch (Throwable t) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("After press key_code 66 { Enter }, %s", t.getMessage()),
-					fileName, caseId, getDeviceId());
+					fileName, caseId, device);
 		}
 	}
 
@@ -590,11 +588,11 @@ public class EntryPoint {
 		try {
 			driver.context("NATIVE_APP");
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, "switch context NATIVE_APP", fileName, caseId, getDeviceId());
+			ExecuteDetail.save(sessionId, "switch context NATIVE_APP", fileName, caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("switch context NATIVE_APP { %s }", e.getMessage()), fileName,
-					caseId, getDeviceId());
+					caseId, device);
 		}
 	}
 
@@ -609,11 +607,11 @@ public class EntryPoint {
 			pagesource = driver.getPageSource();
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("getPageSource { %s }", "success"), fileName, caseId,
-					getDeviceId());
+					device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("getPageSource { %s }", "fail"), fileName, caseId,
-					getDeviceId());
+					device);
 		}
 		return pagesource;
 	}
@@ -627,12 +625,12 @@ public class EntryPoint {
 			allContext = driver.getContextHandles();
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("get All Context { %s }", allContext.toString()), fileName,
-					caseId, getDeviceId());
+					caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId,
 					String.format("get All Context { %s },{ %s }", allContext.toString(), e.getMessage()), fileName,
-					caseId, getDeviceId());
+					caseId, device);
 		}
 		return allContext;
 	}
@@ -648,11 +646,11 @@ public class EntryPoint {
 			context = driver.getContext();
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("current Context { %s }", context), fileName, caseId,
-					getDeviceId());
+					device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("current Context { %s }, { %s }", context, e.getMessage()),
-					fileName, caseId, getDeviceId());
+					fileName, caseId, device);
 		}
 		return context;
 	}
@@ -678,12 +676,12 @@ public class EntryPoint {
 			putCaseId();
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("启动activity { %s , %s }", packageTo, activity), fileName,
-					caseId, getDeviceId());
+					caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId,
 					String.format("启动activity { %s , %s };exception { %s }", packageTo, activity, e.getMessage()),
-					fileName, caseId, getDeviceId());
+					fileName, caseId, device);
 		}
 
 	}
@@ -700,12 +698,12 @@ public class EntryPoint {
 			cap = driver.getCapabilities().getCapability(key);
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("获取capability key= { %s },value={ %s }", key, cap), fileName,
-					caseId, getDeviceId());
+					caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId,
 					String.format("获取capability key= { %s },value={ %s };exception { %s }", key, cap, e.getMessage()),
-					fileName, caseId, getDeviceId());
+					fileName, caseId, device);
 		}
 		return cap;
 	}
@@ -728,11 +726,11 @@ public class EntryPoint {
 		try {
 			Thread.sleep(second * 1000);
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("线程等待 { %s 秒 }", second), fileName, caseId, getDeviceId());
+			ExecuteDetail.save(sessionId, String.format("线程等待 { %s 秒 }", second), fileName, caseId, device);
 		} catch (InterruptedException e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("线程等待 { %s 秒 }，exception {%s}", second, e.getMessage()),
-					fileName, caseId, getDeviceId());
+					fileName, caseId, device);
 		}
 	}
 
@@ -756,11 +754,11 @@ public class EntryPoint {
 			density = ((HasDeviceDetails) driver).getDisplayDensity();
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("getDisplayDensity { %s }", density), fileName, caseId,
-					getDeviceId());
+					device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("getDisplayDensity { %s }", density), fileName, caseId,
-					getDeviceId());
+					device);
 		}
 		return density;
 	}
@@ -776,11 +774,11 @@ public class EntryPoint {
 			currentActivity = ((StartsActivity) driver).currentActivity();
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("currentActivity { %s }", currentActivity), fileName, caseId,
-					getDeviceId());
+					device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("currentActivity { %s }", currentActivity), fileName, caseId,
-					getDeviceId());
+					device);
 		}
 		return currentActivity;
 	}
