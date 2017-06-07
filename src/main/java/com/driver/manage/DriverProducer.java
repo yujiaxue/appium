@@ -33,7 +33,7 @@ public class DriverProducer {
 	public Object[][] createDriver() {
 		if (see == null) {
 			synchronized ("mysee") {
-				System.out.println("mysee is  init ....");
+				System.out.println("mysee is  init ....devices count is .."+AppiumServer.allServertemp.size());
 				see = new Object[AppiumServer.allServertemp.size()][1];
 				AppiumDriverGenerate();
 				System.out.println("driver all generated finish...");

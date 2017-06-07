@@ -9,7 +9,34 @@ public class AppTest {
 	public static String status;
 	public static String devices;
 	public static String appName;
+	public static int caseNumber;
+	public static int getCaseNumber() {
+		return caseNumber;
+	}
 
+	public static void setCaseNumber(int caseNumber) {
+		AppTest.caseNumber = caseNumber;
+	}
+
+	public static int getPassNumber() {
+		return passNumber;
+	}
+
+	public static void setPassNumber(int passNumber) {
+		AppTest.passNumber = passNumber;
+	}
+
+	public static int getFailNumber() {
+		return failNumber;
+	}
+
+	public static void setFailNumber(int failNumber) {
+		AppTest.failNumber = failNumber;
+	}
+
+	public static int passNumber;
+	public static int failNumber;
+	
 	public static String getAppName() {
 		return appName;
 	}
@@ -31,12 +58,13 @@ public class AppTest {
 	}
 
 	public static int save() {
-		return Operation.insertData("insert into apptest(executeId,devices,appName) value(?,?,?)", getExecuteid(),
-				getDevices(), getAppName());
+		return Operation.insertData("insert into apptest(executeId,devices,appName,caseNumber) value(?,?,?,?)", getExecuteid(),
+				getDevices(), getAppName(),getCaseNumber());
 	}
 
 	public static void updateStatus() {
-		Operation.insertData("update apptest set status=? where executeid=?", getStatus(), getExecuteid());
+		Operation.insertData("update apptest set status=?,passNumber=?,failNumber=? where executeid=?",
+				getStatus(), getExecuteid(),getPassNumber(),getFailNumber());
 	}
 
 	/**
