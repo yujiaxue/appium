@@ -65,7 +65,7 @@ public class Assertion {
 	public static void noElementFail(String locator, String log, String caseid) {
 		// 用例失败标记，
 		// 脚本中断退出，
-		ExecuteDetail.save(sessionId, String.format("element not found { %s },%s", locator, log), "", caseid, deviceId);
+		ExecuteDetail.save(sessionId, String.format("元素没有被找到 { %s },%s", locator, log), "", caseid, deviceId);
 		failCase();
 	}
 

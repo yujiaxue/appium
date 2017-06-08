@@ -90,7 +90,7 @@ public class EntryPoint {
 	 * @param locator
 	 * @return
 	 */
-	public WebElement getElement(String locator) {
+	public WebElement getElement(String locator,String log) {
 		putCaseId();
 		By type = TypeCheck.getLocatorType(locator);
 		WebElement ele = null;
@@ -107,6 +107,15 @@ public class EntryPoint {
 			Assertion.failCase();
 		}
 		return ele;
+	}
+	/**
+	 * 获取界面元素支持 id,class,xpath,accessbility id
+	 * 
+	 * @param locator
+	 * @return
+	 */
+	public WebElement getElement(String locator) {
+		return getElement(locator,String.format("查找元素{%s}",locator));
 	}
 
 	/**
@@ -140,7 +149,7 @@ public class EntryPoint {
 	 * @param locator
 	 * @return
 	 */
-	public WebElement checkElement(String locator) {
+	public WebElement checkElement(String locator,String log) {
 		By type = TypeCheck.getLocatorType(locator);
 		WebElement ele = null;
 		try {
@@ -151,6 +160,15 @@ public class EntryPoint {
 			e.printStackTrace();
 		}
 		return ele;
+	}
+	/**
+	 * 验证元素
+	 * 
+	 * @param locator
+	 * @return
+	 */
+	public WebElement checkElement(String locator) {
+		return checkElement(locator,String.format("检查元素{%s}是否能被找到，找到即返回,否则返回null",locator));
 	}
 
 	/**
@@ -181,6 +199,22 @@ public class EntryPoint {
 	 */
 	public void click(String locator) {
 		click(locator, String.format("点击元素Element { %s }", locator));
+	}
+	/**
+	 * 点击元素，传入Element
+	 */
+	public void click(WebElement element,String log) {
+		try {
+			element.click();
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("点击元素 { %s }, { %s } on device { %s },{ %s }", element,
+					log, device, e.getMessage()), fileName, caseId, device);
+			Assertion.failCase();
+		}
+	}
+	public void click(WebElement element){
+		click(element,"点击元素"+element);
 	}
 
 	public void enterText(String locator, String text, String log) {
@@ -216,21 +250,24 @@ public class EntryPoint {
 	 * @param locator
 	 * @return
 	 */
-	public String getText(String locator) {
+	public String getText(String locator,String log) {
 		WebElement ele = getElement(locator);
 		String text = null;
 		try {
 			text = ele.getText();
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("getText from  Element { %s }", locator), fileName, caseId,
+			ExecuteDetail.save(sessionId, String.format("获取元素文本从 { %s }", locator), fileName, caseId,
 					device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("getText from  Element { %s }", locator), fileName, caseId,
+			ExecuteDetail.save(sessionId, String.format("获取元素文本从 { %s }", locator), fileName, caseId,
 					device);
 			Assertion.failCase();
 		}
 		return text;
+	}
+	public String getText(String locator) {
+		return getText(locator,String.format("获取元素文本 {%s}", locator));
 	}
 
 	/**
@@ -782,4 +819,5 @@ public class EntryPoint {
 		}
 		return currentActivity;
 	}
+	
 }
