@@ -28,7 +28,7 @@ import io.appium.java_client.service.local.flags.GeneralServerFlag;
  */
 public class AppiumServer extends Context {
 
-	private static ArrayList<String> devices = new ArrayList<String>();
+	public static ArrayList<String> devices = new ArrayList<String>();
 	public static List<AppiumDriverLocalService> allServer = new ArrayList<AppiumDriverLocalService>();
 	public static HashMap<String, String> serverAndDevice = new HashMap<String, String>();
 	public static List<String> allServertemp = new ArrayList<String>();
