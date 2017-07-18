@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import org.testng.Assert;
 
 import com.android.uitest.driver.UIFlags;
-import com.autotest.entrypoint.EntryPoint;
+import com.autotest.entrypoint.IEntryPoint;
 import com.autotest.factory.EntryFactory;
 import com.autotest.service.AppiumServer;
 
@@ -52,7 +52,7 @@ public class DriverProducer {
 		for (Entry<String, String> es : AppiumServer.serverAndDevice.entrySet()) {
 			config.put(UIFlags.UDID, es.getValue());
 			config.put(UIFlags.APPIUM_SERVER_URL, es.getKey());
-			EntryPoint point = EntryFactory.genDriver(config);
+			IEntryPoint point = EntryFactory.genDriver(config);
 			if (point == null) {
 				Assert.fail();
 			}

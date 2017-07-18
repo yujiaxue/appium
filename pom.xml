@@ -12,8 +12,10 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.you.require>5.0.0-BETA7</version.you.require>
-		<selenium.version.you.require>3.3.1</selenium.version.you.require>
+		<!-- <version.you.require>5.0.0-BETA7</version.you.require> -->
+		<version.you.require>5.0.0-BETA4</version.you.require>
+		<!-- <selenium.version.you.require>3.3.1</selenium.version.you.require> -->
+		<selenium.version.you.require>2.53.1</selenium.version.you.require>
 	</properties>
 
 	<dependencies>
@@ -25,7 +27,7 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>3.3.1</version>
+			<version>${selenium.version.you.require}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -70,5 +72,5 @@
 		</plugins>
 
 	</build>
-	
+
 </project>

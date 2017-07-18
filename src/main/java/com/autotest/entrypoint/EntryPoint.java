@@ -1,7 +1,7 @@
 package com.autotest.entrypoint;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.openqa.selenium.By;
@@ -10,11 +10,11 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.InvalidCoordinatesException;
 
 import com.autotest.Listener.TakeScreen;
 import com.autotest.assertion.Assertion;
 import com.persist.ExecuteDetail;
-import com.persist.api.Operation;
 
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.FindsByAndroidUIAutomator;
@@ -27,12 +27,37 @@ import io.appium.java_client.android.AndroidElement;
 import io.appium.java_client.android.HasDeviceDetails;
 import io.appium.java_client.android.StartsActivity;
 
-public class EntryPoint {
+public class EntryPoint implements IEntryPoint {
 	AppiumDriver<?> driver = null;
 	String sessionId = null;
 	String caseId = null;
 	TouchAction touchAction = null;
 	String device = null;
+	int casePass = 0;
+	int caseFail = 0;
+
+	// appium bug 临时解决
+	int x = 0;
+	int y = 0;
+	int pre_x = 0;
+	int pre_y = 0;
+
+	public int getCasePass() {
+		return casePass;
+	}
+
+	public void setCasePass(int casePass) {
+		this.casePass = casePass;
+	}
+
+	public int getCaseFail() {
+		return caseFail;
+	}
+
+	public void setCaseFail(int caseFail) {
+		this.caseFail = caseFail;
+	}
+
 	// int executeId =0;
 
 	// public int getExecuteId() {
@@ -49,10 +74,10 @@ public class EntryPoint {
 
 	public void setCaseId(String caseId) {
 		this.caseId = caseId;
-		System.out.println("设置caseId ..."+ this.caseId);
+		System.out.println("设置caseId ..." + this.caseId);
 	}
 
-	public EntryPoint(AppiumDriver<WebElement> driver,String device) {
+	public EntryPoint(AppiumDriver<WebElement> driver, String device) {
 		this.driver = driver;
 		this.device = device;
 		touchAction = new TouchAction(this.driver);
@@ -65,32 +90,12 @@ public class EntryPoint {
 	}
 
 	/**
-	 * 断言相等 actual== expect为真，否则用例失败
-	 * 
-	 * @param actual
-	 * @param expect
-	 */
-	public void assertEquals(String actual, String expect) {
-		Assertion.assertEquals(expect, actual);
-	}
-
-	/**
-	 * 断言包含 actual包含expect为真
-	 * 
-	 * @param actual
-	 * @param expect
-	 */
-	public void assertContains(String actual, String expect) {
-		Assertion.assertContains(actual, expect);
-	}
-
-	/**
 	 * 获取界面元素支持 id,class,xpath,accessbility id
 	 * 
 	 * @param locator
 	 * @return
 	 */
-	public WebElement getElement(String locator,String log) {
+	public WebElement getElement(String locator, String log) {
 		putCaseId();
 		By type = TypeCheck.getLocatorType(locator);
 		WebElement ele = null;
@@ -98,16 +103,21 @@ public class EntryPoint {
 			ele = driver.findElement(type);
 		} catch (NoSuchElementException e) {
 			Assertion.noElementFail(locator, e.getMessage(), String.valueOf(getCaseId()));
-		} catch (Exception e) {
+		} catch (Throwable e) {
+			System.out.println("------------------------------------------------------------");
+			System.out.println(e.getCause() + "   " + e.getClass().getSimpleName());
+			System.out.println("------------------------------------------------------------");
 			e.printStackTrace();
+			System.out.println("------------------------------------------------------------");
 			// 用例失败标记，
 			// 脚本中断退出，未知异常
-			ExecuteDetail.save(sessionId, String.format("unknown error { %s ,%s}", locator, e.getMessage()), "", caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("CaseFail:没有找到对应元素 { %s ,%s}", locator, e.getMessage()), "",
+					caseId, device);
 			Assertion.failCase();
 		}
 		return ele;
 	}
+
 	/**
 	 * 获取界面元素支持 id,class,xpath,accessbility id
 	 * 
@@ -115,7 +125,7 @@ public class EntryPoint {
 	 * @return
 	 */
 	public WebElement getElement(String locator) {
-		return getElement(locator,String.format("查找元素{%s}",locator));
+		return getElement(locator, String.format("查找元素{%s}", locator));
 	}
 
 	/**
@@ -129,7 +139,6 @@ public class EntryPoint {
 		By type = TypeCheck.getLocatorType(locator);
 		List<WebElement> eles = null;
 		try {
-
 			eles = (List<WebElement>) driver.findElements(type);
 			ExecuteDetail.save(sessionId, String.format("getElements by { %s } ", locator), "", caseId, device);
 		} catch (NoSuchElementException e) {
@@ -144,23 +153,35 @@ public class EntryPoint {
 	}
 
 	/**
+	 * 获取元素个数
+	 */
+	public int getElementsCount(String locator) {
+		List<WebElement> elements = getElements(locator);
+		return elements.size();
+	}
+
+	/**
 	 * 验证元素
 	 * 
 	 * @param locator
 	 * @return
 	 */
-	public WebElement checkElement(String locator,String log) {
+	public WebElement checkElement(String locator, String log) {
 		By type = TypeCheck.getLocatorType(locator);
 		WebElement ele = null;
 		try {
 			ele = driver.findElement(type);
 		} catch (NoSuchElementException e) {
-			Assertion.noElementFail(locator, e.getMessage().toString(), getCaseId());
+			System.out.println(locator + "该元素没有找到，不抛出异常");
+			// Assertion.noElementFail(locator, e.getMessage().toString(),
+			// getCaseId());
 		} catch (Throwable e) {
 			e.printStackTrace();
+			// Assertion.failCase();
 		}
 		return ele;
 	}
+
 	/**
 	 * 验证元素
 	 * 
@@ -168,7 +189,7 @@ public class EntryPoint {
 	 * @return
 	 */
 	public WebElement checkElement(String locator) {
-		return checkElement(locator,String.format("检查元素{%s}是否能被找到，找到即返回,否则返回null",locator));
+		return checkElement(locator, String.format("检查元素{%s}是否能被找到，找到即返回,否则返回null", locator));
 	}
 
 	/**
@@ -183,6 +204,10 @@ public class EntryPoint {
 		WebElement me = getElement(locator);
 		try {
 			me.click();
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId,
+					String.format("Click Element { %s }, { %s } on device { %s }", locator, log, device), fileName,
+					caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("Click Element { %s }, { %s } on device { %s },{ %s }", locator,
@@ -200,21 +225,24 @@ public class EntryPoint {
 	public void click(String locator) {
 		click(locator, String.format("点击元素Element { %s }", locator));
 	}
+
 	/**
 	 * 点击元素，传入Element
 	 */
-	public void click(WebElement element,String log) {
+	public void click(WebElement element, String log) {
 		try {
 			element.click();
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("点击元素 { %s }, { %s } on device { %s },{ %s }", element,
-					log, device, e.getMessage()), fileName, caseId, device);
+			ExecuteDetail.save(sessionId,
+					String.format("点击元素 { %s }, { %s } on device { %s },{ %s }", element, log, device, e.getMessage()),
+					fileName, caseId, device);
 			Assertion.failCase();
 		}
 	}
-	public void click(WebElement element){
-		click(element,"点击元素"+element);
+
+	public void click(WebElement element) {
+		click(element, "点击元素" + element);
 	}
 
 	public void enterText(String locator, String text, String log) {
@@ -226,8 +254,9 @@ public class EntryPoint {
 					fileName, caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("enter { %s } to Element { %s }, { %s }", text, locator, e.getMessage()),
-					fileName, caseId, device);
+			ExecuteDetail.save(sessionId,
+					String.format("enter { %s } to Element { %s }, { %s }", text, locator, e.getMessage()), fileName,
+					caseId, device);
 			Assertion.failCase();
 		}
 	}
@@ -250,24 +279,56 @@ public class EntryPoint {
 	 * @param locator
 	 * @return
 	 */
-	public String getText(String locator,String log) {
+	public String getText(String locator, String log) {
 		WebElement ele = getElement(locator);
 		String text = null;
 		try {
 			text = ele.getText();
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("获取元素文本从 { %s }", locator), fileName, caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("获取元素文本从 { %s }", locator), fileName, caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("获取元素文本从 { %s }", locator), fileName, caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("获取元素文本从 { %s }", locator), fileName, caseId, device);
 			Assertion.failCase();
 		}
 		return text;
 	}
+
 	public String getText(String locator) {
-		return getText(locator,String.format("获取元素文本 {%s}", locator));
+		return getText(locator, String.format("获取元素文本 {%s}", locator));
+	}
+
+	/**
+	 * 获取视图content-desc的内容
+	 * 
+	 * @param locator
+	 * @return
+	 */
+	public String getName(String locator) {
+		return getName(locator, "");
+	}
+
+	/**
+	 * 获取视图content-desc的内容
+	 * 
+	 * @param locator
+	 * @return
+	 */
+	public String getName(String locator, String log) {
+		WebElement ele = getElement(locator);
+		String text = null;
+		try {
+			text = ele.getAttribute("name");
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("Success:获取content-desc属性值从 { %s },%s", locator, log), fileName,
+					caseId, device);
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("Fail:获取content-desc属性值从 { %s },%s", locator, log), fileName,
+					caseId, device);
+			Assertion.failCase();
+		}
+		return text;
 	}
 
 	/**
@@ -290,6 +351,7 @@ public class EntryPoint {
 	 * /usr/local/lib/node_modules/appium/node_modules/appium-chromedriver/chromedriver/mac
 	 */
 	public void switchToWebView() {
+
 		Set<String> context = driver.getContextHandles();
 		String webview = null;
 		try {
@@ -553,35 +615,145 @@ public class EntryPoint {
 	}
 
 	/**
+	 * tap 坐标
+	 * 
+	 * @param x
+	 * @param y
+	 */
+	public void tap(int x, int y) {
+		tap(x, y, "");
+	}
+
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @param log
+	 */
+	public void tap(int x, int y, String log) {
+		if (driver.isBrowser()) {
+			driver.context("NATIVE_APP");
+		}
+		String fileName = TakeScreen.takeSreen(driver);
+		try {
+			touchAction.tap(x, y).perform();
+			ExecuteDetail.save(sessionId, String.format("Success:tap by xy { x=%d,y=%d };%s", x, y, log), fileName,
+					caseId, device);
+		} catch (Exception e) {
+			ExecuteDetail.save(sessionId, String.format("Fail:tap by xy { x=%d,y=%d };%s", x, y, log), fileName, caseId,
+					device);
+			Assertion.failCase();
+		}
+		if (!driver.isBrowser()) {
+			switchToWebView();
+		}
+
+	}
+
+	/**
+	 * 
+	 * @param locator
+	 */
+	public void press(String locator, String log) {
+		WebElement ele = getElement(locator);
+		String fileName = TakeScreen.takeSreen(driver);
+		try {
+			touchAction.press(ele).release().perform();
+			ExecuteDetail.save(sessionId, String.format("Success:press element { %s } ;%s", ele, log), fileName, caseId,
+					device);
+		} catch (Exception e) {
+			ExecuteDetail.save(sessionId,
+					String.format("Success:press element { %s } ;%s;%s", ele, log, e.getMessage()), fileName, caseId,
+					device);
+		}
+	}
+
+	public void press(int x, int y) {
+		touchAction.press(x, y);
+	}
+
+	/**
 	 * 根据元素的坐标点击操作，webview中可以使用此方法
 	 * 
 	 * @param locator
 	 */
 	public void tap(String locator) {
 		WebElement ele = getElement(locator);
-		tap(ele);
+		tap(ele, "");
+	}
+
+	/**
+	 * 
+	 * @param locator
+	 * @param log
+	 */
+	public void tap(String locator, String log) {
+		WebElement ele = getElement(locator);
+		tap(ele, log);
 	}
 
 	/**
 	 * 根据元素的坐标点击操作，webview中可以使用此方法
 	 * 
 	 * @param ele
+	 * @param log
 	 */
-	public void tap(WebElement ele) {
+	public void tap(WebElement ele, String log) {
+
+		System.out.println("==================" + ele + "==================");
 		Point p = ((MobileElement) ele).getCenter();
-		System.out.println(p.x + " " + p.y + " " + ((MobileElement) ele).getSize().getHeight());
+		x = p.x;
+		y = p.y;
+
 		if (driver.isBrowser()) {
 			driver.context("NATIVE_APP");
 		}
-		touchAction.tap(p.x, p.y).perform().release();
+		try {
+			touchAction.tap(p.x, p.y).perform(); // .release()
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId,
+					String.format("Success:tap click element { %s } by location { x=%d,y=%d };%s", ele, p.x, p.y, log),
+					fileName, caseId, device);
+		} catch (InvalidCoordinatesException e) {
+			try {
+				// appium bug 临时解决
+				System.out.println(e.getMessage());
+				int tempx = p.x - pre_x;
+				int tempy = p.y - pre_y;
+				touchAction.tap(tempx, tempy).perform(); // .release()
 
-		String fileName = TakeScreen.takeSreen(driver);
-		ExecuteDetail.save(sessionId,
-				String.format("tap click element { %s } by location { x=%d,y=%d }", ele, p.x, p.y), fileName, caseId,
-				device);
+				String fileName = TakeScreen.takeSreen(driver);
+				ExecuteDetail.save(sessionId,
+						String.format("Success:Retry tap click element { %s } by location { x=%d,y=%d };%s", ele, tempx,
+								tempy, log),
+						fileName, caseId, device);
+			} catch (Exception ex) {
+				System.out.println(e.getClass());
+				System.out.println("------------------------------------------------");
+				System.out.println(e.getMessage());
+			}
+		} catch (Exception e) {
+			System.out.println("tap exception start====================================");
+			System.out.println(e.getClass());
+			System.out.println("------------------------------------------------");
+			System.out.println(e.getCause());
+			System.out.println("------------------------------------------------");
+			System.out.println(e.getMessage());
+			System.out.println("tap exception end====================================");
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId,
+					String.format("Fail:tap click element { %s } by location { x=%d,y=%d };%s", ele, p.x, p.y, log),
+					fileName, caseId, device);
+			Assertion.failCase();
+		}
+
 		if (!driver.isBrowser()) {
 			switchToWebView();
 		}
+		pre_x = x;
+		pre_y = y;
+		x = 0;
+		y = 0;
 	}
 
 	/**
@@ -598,11 +770,11 @@ public class EntryPoint {
 		try {
 			((AndroidDriver<?>) driver).pressKeyCode(code);
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("After press key_code 66 { Enter }"), fileName, caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("Success:After press key_code %d { Enter }", code), fileName,
+					caseId, device);
 		} catch (Throwable t) {
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("After press key_code 66 { Enter }, %s", t.getMessage()),
+			ExecuteDetail.save(sessionId, String.format("Fail:After press key_code %d { Enter }, %s", t.getMessage()),
 					fileName, caseId, device);
 		}
 	}
@@ -643,12 +815,10 @@ public class EntryPoint {
 		try {
 			pagesource = driver.getPageSource();
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("getPageSource { %s }", "success"), fileName, caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("getPageSource { %s }", "success"), fileName, caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("getPageSource { %s }", "fail"), fileName, caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("getPageSource { %s }", "fail"), fileName, caseId, device);
 		}
 		return pagesource;
 	}
@@ -682,8 +852,7 @@ public class EntryPoint {
 		try {
 			context = driver.getContext();
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("current Context { %s }", context), fileName, caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("current Context { %s }", context), fileName, caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
 			ExecuteDetail.save(sessionId, String.format("current Context { %s }, { %s }", context, e.getMessage()),
@@ -719,6 +888,21 @@ public class EntryPoint {
 			ExecuteDetail.save(sessionId,
 					String.format("启动activity { %s , %s };exception { %s }", packageTo, activity, e.getMessage()),
 					fileName, caseId, device);
+		}
+
+	}
+
+	/**
+	 * 硬件返回上一级页面
+	 */
+	public void back_Menu() {
+		try {
+			pressKeyCode(4);
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("Success:返回上一级页面"), fileName, caseId, device);
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("Fail:返回上一级页面"), fileName, caseId, device);
 		}
 
 	}
@@ -781,21 +965,29 @@ public class EntryPoint {
 	}
 
 	/**
+	 * 获取状态栏
+	 * 
+	 * @return
+	 */
+	public Map<String, String> getbars() {
+		return ((HasDeviceDetails) driver).getSystemBars();
+	}
+
+	/**
 	 * 获取当前设备的显示密度
 	 * 
 	 * @return
 	 */
 	public long getDisplayDensity() {
+
 		long density = 0;
 		try {
 			density = ((HasDeviceDetails) driver).getDisplayDensity();
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("getDisplayDensity { %s }", density), fileName, caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("getDisplayDensity { %s }", density), fileName, caseId, device);
 		} catch (Exception e) {
 			String fileName = TakeScreen.takeSreen(driver);
-			ExecuteDetail.save(sessionId, String.format("getDisplayDensity { %s }", density), fileName, caseId,
-					device);
+			ExecuteDetail.save(sessionId, String.format("getDisplayDensity { %s }", density), fileName, caseId, device);
 		}
 		return density;
 	}
@@ -819,5 +1011,56 @@ public class EntryPoint {
 		}
 		return currentActivity;
 	}
-	
+
+	/**
+	 * 获取元素属性
+	 * 
+	 * @param locator
+	 * @param attribute
+	 * @param log
+	 * @return
+	 */
+	public String getAttribute(String locator, String attribute, String log) {
+		WebElement ele = getElement(locator);
+		String attr = null;
+		try {
+			attr = ele.getAttribute(attribute);
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId, String.format("Success: getAttribute %s of %s,%s", attribute, locator, log),
+					fileName, caseId, device);
+		} catch (Exception e) {
+			String fileName = TakeScreen.takeSreen(driver);
+			ExecuteDetail.save(sessionId,
+					String.format("Fail: getAttribute %s of %s,%s;%s", attribute, locator, log, e.getMessage()),
+					fileName, caseId, device);
+		}
+		return attr;
+	}
+
+	/**
+	 * 获取元素属性
+	 * 
+	 * @param locator
+	 * @param attribute
+	 * @return
+	 */
+	public String getAttribute(String locator, String attribute) {
+		return getAttribute(locator, attribute, "");
+	}
+
+	/**
+	 * 获取input的value
+	 * 
+	 * @param locator
+	 * @param log
+	 * @return
+	 */
+	public String getInputText(String locator, String log) {
+		return getAttribute(locator, "value", log);
+	}
+
+	public String getInputText(String locator) {
+		return getAttribute(locator, "value", "");
+	}
+
 }

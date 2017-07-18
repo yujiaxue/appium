@@ -8,7 +8,8 @@ public enum LocatorType {
 	
 	
 
-	XPATH("//");
+	XPATH("//"),
+	XPATH2("xpath=");
 
 	private final String args;
 	LocatorType(String args){

@@ -9,12 +9,13 @@ import io.appium.java_client.MobileBy;
 public class TypeCheck {
 
 	public static By getLocatorType(String locator) {
+		if (locator.startsWith(LocatorType.XPATH.getArgument()) || locator.startsWith(LocatorType.XPATH2.getArgument())) {
+			return By.xpath(locator);
+		}
 		if (locator.contains(LocatorType.ID.getArgument())) {
 			return MobileBy.id(locator);
 		}
-		if (locator.startsWith(LocatorType.XPATH.getArgument())) {
-			return By.xpath(locator);
-		}
+		
 		if (locator.startsWith("android")) {
 			return By.className(locator);
 		}

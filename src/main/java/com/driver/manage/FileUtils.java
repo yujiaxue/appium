@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,21 +23,30 @@ import net.sourceforge.htmlunit.corejs.javascript.GeneratedClassLoader;
 public class FileUtils {
 	BufferedReader in = null;
 	static FileUtils fu = null;
+	static String config = null;
+	static String pro_ip = "10.11.27.39";
 
-	public Map loadProperties(String filePath) {
-
-		// InputStream a =
-		// getClass().getClassLoader().getResourceAsStream("/Users/zhangfujun/Documents/NewLand/uitest/src/java/resources/devices.ini");
-		InputStream a = getClass().getClassLoader().getResourceAsStream("config.properties");
-
-		return null;
-	}
+	// public Map loadProperties(String filePath) {
+	//
+	// // InputStream a =
+	// //
+	// getClass().getClassLoader().getResourceAsStream("/Users/zhangfujun/Documents/NewLand/uitest/src/java/resources/devices.ini");
+	// InputStream a =
+	// getClass().getClassLoader().getResourceAsStream("config.properties");
+	//
+	// return null;
+	// }
 
 	public synchronized static FileUtils load() {
 		if (fu == null) {
 			fu = new FileUtils();
 		} else {
 			return fu;
+		}
+		if (ipSwitch() == pro_ip) {
+			config = "config_pro.properties";
+		} else {
+			config = "config.properties";
 		}
 		return fu;
 	}
@@ -49,7 +60,8 @@ public class FileUtils {
 			// p.load(new InputStreamReader(new FileInputStream(new
 			// File("/Users/zhangfujun/Documents/NewLand/uitest/src/java/resources/devices.properties")),
 			// "utf-8"));
-			InputStream a = getClass().getClassLoader().getResourceAsStream("config.properties");
+
+			InputStream a = getClass().getClassLoader().getResourceAsStream(config);
 			// p.load(new InputStreamReader(new FileInputStream(new
 			// File("config.properties").getAbsolutePath())));
 			p.load(a);
@@ -68,6 +80,35 @@ public class FileUtils {
 		// pro.put(a.toString(), p.getProperty((String) a));
 		// }
 		return pro;
+	}
+
+	/**
+	 * 获取本机ip
+	 */
+	public static String ipSwitch() {
+		String ipAddr = "";
+		try {
+			ipAddr = InetAddress.getLocalHost().getHostAddress().toString();
+			// System.out.println(InetAddress.getLocalHost().getHostName().toString());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		System.out.println(ipAddr);
+		// InetAddress[] addrs = InetAddress.getAllByName(hostName);
+		// if (addrs.length > 0) {
+		// for (int i = 0; i < addrs.length; i++) {
+		// InetAddress address = addrs[i];
+		// System.out.println("**********************");
+		// System.out.println(address.getHostAddress());
+		// if (address instanceof Inet6Address) {
+		// System.out.println("true6");
+		// } else if(address instanceof Inet4Address){
+		// System.out.println("true4");
+		// } else {
+		// System.out.println("unknown");
+		// }
+		// System.out.println("**********************");
+		return ipAddr;
 	}
 
 	/**
@@ -139,7 +180,6 @@ public class FileUtils {
 				String.format(sb.toString(), "RW5DOV7SSGUCUCQC", "RW5DOV7SSGUCUCQC", "5.0.2", 4444, "0.0.0.0"));
 	}
 
-
 	/**
 	 * 获取文件绝对路径
 	 * 
@@ -147,7 +187,7 @@ public class FileUtils {
 	 * @return
 	 */
 	public static String getAbsolutePath(String jsonPath) {
-		File f  = new File(jsonPath);
+		File f = new File(jsonPath);
 		return f.getAbsolutePath();
 	}
 

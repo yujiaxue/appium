@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.autotest.Listener.ActionListener;
@@ -32,7 +33,7 @@ public class AppAndroidDriver {
 	private String url = null;
 
 	public AppiumDriver<WebElement> genDriver(Map<String, String> config) {
-
+		
 		File app = new File(config.get(UIFlags.AndroidApk));
 		DesiredCapabilities capabilities = new DesiredCapabilities();
 		capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, "Android");
@@ -42,8 +43,11 @@ public class AppAndroidDriver {
 		capabilities.setCapability(MobileCapabilityType.UDID, config.get(UIFlags.UDID));
 		capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 120);
 		capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM);
-		capabilities.setCapability(MobileCapabilityType.CLEAR_SYSTEM_FILES, true);
-
+		//capabilities.setCapability(MobileCapabilityType.CLEAR_SYSTEM_FILES, true);
+		
+		
+		
+		
 		// capabilities.setCapability(AndroidMobileCapabilityType.APP_ACTIVITY,
 		// ".business.main.MainActivity");
 		// capabilities.setCapability(AndroidMobileCapabilityType.APP_PACKAGE,
@@ -56,11 +60,17 @@ public class AppAndroidDriver {
 		capabilities.setCapability(AndroidMobileCapabilityType.UNICODE_KEYBOARD, true);
 		capabilities.setCapability(AndroidMobileCapabilityType.RESET_KEYBOARD, true);
 
-		capabilities.setCapability(AndroidMobileCapabilityType.RECREATE_CHROME_DRIVER_SESSIONS, true);
+		//capabilities.setCapability(AndroidMobileCapabilityType.RECREATE_CHROME_DRIVER_SESSIONS, true);
 		capabilities.setCapability(AndroidMobileCapabilityType.NATIVE_WEB_SCREENSHOT, true);
 
 		// capabilities.setCapability(MobileCapabilityType.AUTO_WEBVIEW, true);
 
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		
 		try {
 			driver = new AndroidDriver<>(new URL(config.get(UIFlags.APPIUM_SERVER_URL)), capabilities);
 		} catch (MalformedURLException e) {

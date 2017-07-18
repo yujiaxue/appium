@@ -1,9 +1,12 @@
 package com.test.test.test;
 
-import com.android.uitest.config.AutoMation;
+import org.testng.annotations.Test;
 
 public class test {
 
-	public static void main(String[] args) {
+
+	@Test
+	public void test(){
+		
 	}
 }

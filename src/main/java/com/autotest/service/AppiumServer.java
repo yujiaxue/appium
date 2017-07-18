@@ -180,8 +180,8 @@ public class AppiumServer extends Context {
 
 	private static void killChrome() {
 		try {
-			Runtime.getRuntime().exec("killall chromedriver");
-			Runtime.getRuntime().exec("killall node");
+			Runtime.getRuntime().exec("killall -9 chromedriver");
+			Runtime.getRuntime().exec("killall -9 node");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
