@@ -100,15 +100,17 @@ public class EntryPoint implements IEntryPoint {
 		By type = TypeCheck.getLocatorType(locator);
 		WebElement ele = null;
 		try {
+			int i = 0;
 			ele = driver.findElement(type);
+			while (ele == null && i < 3) {
+				ele = driver.findElement(type);
+				i++;
+			}
 		} catch (NoSuchElementException e) {
 			Assertion.noElementFail(locator, e.getMessage(), String.valueOf(getCaseId()));
 		} catch (Throwable e) {
-			System.out.println("------------------------------------------------------------");
 			System.out.println(e.getCause() + "   " + e.getClass().getSimpleName());
-			System.out.println("------------------------------------------------------------");
 			e.printStackTrace();
-			System.out.println("------------------------------------------------------------");
 			// 用例失败标记，
 			// 脚本中断退出，未知异常
 			ExecuteDetail.save(sessionId, String.format("CaseFail:没有找到对应元素 { %s ,%s}", locator, e.getMessage()), "",

@@ -39,11 +39,11 @@ public class AppAndroidDriver {
 		capabilities.setCapability(MobileCapabilityType.DEVICE_NAME, "Android");
 		capabilities.setCapability(MobileCapabilityType.APP, app.getAbsolutePath());
 		capabilities.setCapability(MobileCapabilityType.PLATFORM_NAME, MobilePlatform.ANDROID);
-		capabilities.setCapability(MobileCapabilityType.VERSION, 5.1);
+		capabilities.setCapability(MobileCapabilityType.VERSION, 7.0);
 		capabilities.setCapability(MobileCapabilityType.UDID, config.get(UIFlags.UDID));
 		capabilities.setCapability(MobileCapabilityType.NEW_COMMAND_TIMEOUT, 120);
 		capabilities.setCapability(MobileCapabilityType.AUTOMATION_NAME, AutomationName.APPIUM);
-		//capabilities.setCapability(MobileCapabilityType.CLEAR_SYSTEM_FILES, true);
+		capabilities.setCapability(MobileCapabilityType.CLEAR_SYSTEM_FILES, true);
 		
 		
 		
@@ -64,7 +64,6 @@ public class AppAndroidDriver {
 		capabilities.setCapability(AndroidMobileCapabilityType.NATIVE_WEB_SCREENSHOT, true);
 
 		// capabilities.setCapability(MobileCapabilityType.AUTO_WEBVIEW, true);
-
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e1) {

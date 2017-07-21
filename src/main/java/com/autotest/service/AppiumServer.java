@@ -15,7 +15,6 @@ import com.android.uitest.driver.UIFlags;
 import com.autotest.entrypoint.Context;
 import com.driver.manage.FileUtils;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
@@ -48,18 +47,20 @@ public class AppiumServer extends Context {
 		}
 		return json.toString();
 	}
+
 	/**
 	 * chage hub
 	 */
-	public static void hub(){
-		try{
+	public static void hub() {
+		try {
 			hubhost = config.get(UIFlags.HUBHOST);
 			hubport = Integer.parseInt(config.get(UIFlags.HUBPORT));
-			System.out.println(String.format("Hub host is change : %s %d ",hubhost,hubport));
-		}catch(Exception e){
+			System.out.println(String.format("Hub host is change : %s %d ", hubhost, hubport));
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * 启动appiumServer服务
 	 */
@@ -76,7 +77,7 @@ public class AppiumServer extends Context {
 			String port = service.getUrl().toString().substring(tempurl.lastIndexOf(":") + 1, tempurl.indexOf("/wd"));
 			String fileName = "nodeconfig_" + android + ".json";
 			FileUtils.generateJson(fileName, android, android, "5.0.2", hubport, hubhost);
-			AppiumServerThread ast = new AppiumServerThread(port, fileName,config);
+			AppiumServerThread ast = new AppiumServerThread(port, fileName, config);
 			// "/Users/zhangfujun/Documents/NewLand/hxUIAuto/src/main/resources/nodeconfig"
 			// + logname + ".json"
 			ast.start();
@@ -200,16 +201,20 @@ class AppiumServerThread extends Thread {
 	}
 
 	public void run() {
-		InputStream in = null;
 		try {
-			Process pro = Runtime.getRuntime().exec(new String[] { config.get("node"),
-					config.get("appium"), "-p", port, "--session-override", "--nodeconfig", jsonPath });// "/Users/zhangfujun/Documents/NewLand/uitest/src/main/resources/nodeconfig1.json"
+			Process pro = Runtime.getRuntime().exec(new String[] { config.get("node"), config.get("appium"), "-p", port,
+					"--session-override", "--no-reset", "--nodeconfig", jsonPath });// "/Users/zhangfujun/Documents/NewLand/uitest/src/main/resources/nodeconfig1.json"
 
 			// Process pro = Runtime.getRuntime().exec(new String[] {
 			// "/usr/local/Cellar/node/6.6.0/bin/node",
 			// "/usr/local/bin/appium", "-p", port, "--session-override",
 			// "--nodeconfig", jsonPath });//
 			// "/Users/zhangfujun/Documents/NewLand/uitest/src/main/resources/nodeconfig1.json"
+			BufferedReader br = new BufferedReader(new InputStreamReader(pro.getErrorStream()));
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+			}
 			pro.waitFor(30, TimeUnit.MINUTES);
 		} catch (Exception e) {
 			e.printStackTrace();

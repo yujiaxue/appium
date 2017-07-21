@@ -9,22 +9,24 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
 import com.android.uitest.driver.UIFlags;
-
-import net.sourceforge.htmlunit.corejs.javascript.GeneratedClassLoader;
 
 public class FileUtils {
 	BufferedReader in = null;
 	static FileUtils fu = null;
 	static String config = null;
 	static String pro_ip = "10.11.27.39";
+	static String net_mark = "enp0s31f6";
 
 	// public Map loadProperties(String filePath) {
 	//
@@ -43,11 +45,12 @@ public class FileUtils {
 		} else {
 			return fu;
 		}
-		if (ipSwitch() == pro_ip) {
+		if (pro_ip.equals(ipSwitch(net_mark))) {
 			config = "config_pro.properties";
 		} else {
 			config = "config.properties";
 		}
+		System.out.println("配置文件是 " + config);
 		return fu;
 	}
 
@@ -85,30 +88,63 @@ public class FileUtils {
 	/**
 	 * 获取本机ip
 	 */
-	public static String ipSwitch() {
+	public static String ipSwitch1() {
 		String ipAddr = "";
+		String hostName = "";
 		try {
 			ipAddr = InetAddress.getLocalHost().getHostAddress().toString();
-			// System.out.println(InetAddress.getLocalHost().getHostName().toString());
+			hostName = InetAddress.getLocalHost().getHostName().toString();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 		System.out.println(ipAddr);
-		// InetAddress[] addrs = InetAddress.getAllByName(hostName);
-		// if (addrs.length > 0) {
-		// for (int i = 0; i < addrs.length; i++) {
-		// InetAddress address = addrs[i];
-		// System.out.println("**********************");
-		// System.out.println(address.getHostAddress());
-		// if (address instanceof Inet6Address) {
-		// System.out.println("true6");
-		// } else if(address instanceof Inet4Address){
-		// System.out.println("true4");
-		// } else {
-		// System.out.println("unknown");
-		// }
-		// System.out.println("**********************");
+		InetAddress[] addrs = null;
+		try {
+			addrs = InetAddress.getAllByName(hostName);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		if (addrs.length > 0) {
+			for (int i = 0; i < addrs.length; i++) {
+				System.out.println(addrs[i]);
+				// InetAddress address = addrs[i];
+				// System.out.println("**********************");
+				// System.out.println(address.getHostAddress());
+				// if (address instanceof Inet6Address) {
+				// System.out.println("true6");
+				// } else if(address instanceof Inet4Address){
+				// System.out.println("true4");
+				// } else {
+				// System.out.println("unknown");
+				// }
+			}
+		}
+		System.out.println("**********************");
 		return ipAddr;
+	}
+
+	public static String ipSwitch(String net) {
+		Enumeration<?> allNetInterfaces;
+		Enumeration<?> addresses;
+		try {
+			allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+			InetAddress ip = null;
+			while (allNetInterfaces.hasMoreElements()) {
+				NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+				if (netInterface.getName().equals(net)) {
+					addresses = netInterface.getInetAddresses();
+					while (addresses.hasMoreElements()) {
+						ip = (InetAddress) addresses.nextElement();
+						if (ip != null && ip instanceof Inet4Address) {
+							return ip.getHostAddress();
+						}
+					}
+				}
+			}
+		} catch (SocketException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 
 	/**

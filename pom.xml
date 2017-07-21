@@ -4,7 +4,8 @@
 
 	<groupId>com.android.uitest</groupId>
 	<artifactId>uitest</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<!-- <version>0.0.1-SNAPSHOT</version> -->
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>uitest</name>
@@ -13,8 +14,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- <version.you.require>5.0.0-BETA7</version.you.require> -->
-		<version.you.require>5.0.0-BETA4</version.you.require>
-		<!-- <selenium.version.you.require>3.3.1</selenium.version.you.require> -->
+		<version.you.require>5.0.0-BETA9</version.you.require>
+		<!--<selenium.version.you.require>3.3.1</selenium.version.you.require> -->
 		<selenium.version.you.require>2.53.1</selenium.version.you.require>
 	</properties>
 
@@ -23,7 +24,23 @@
 			<groupId>io.appium</groupId>
 			<artifactId>java-client</artifactId>
 			<version>${version.you.require}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>21.0</version>
+		</dependency>
+
+
+
+
+
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
@@ -72,5 +89,11 @@
 		</plugins>
 
 	</build>
-
+	<distributionManagement>
+		<repository>
+			<id>Releases</id>
+			<name>qa-release</name>
+			<url>http://nexus.corp.rs.com/nexus/content/repositories/releases/</url>
+		</repository>
+	</distributionManagement>
 </project>
